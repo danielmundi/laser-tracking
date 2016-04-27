@@ -57,10 +57,10 @@ try:
             if len(cnts) > 0:
                 c = max(cnts, key=cv2.contourArea)
                 rect = cv2.minAreaRect(c)
-                center_x, center_y = rect[0] #rect = ((center_x,center_y),(width,height),angle)
+                center_x, center_y = rect[0]
                 box = cv2.boxPoints(rect)
                 box = np.int0(box)
-                cv2.drawContours(image, [box], 0, (0,255,0), 2)
+                cv2.drawContours(image, [box], 0, (9,255,0), 2)
                 cv2.circle(image, (int(center_x), int(center_y)), 3, (255,255,255), -1)
 
             client_socket.sendall(image.data)
