@@ -1,4 +1,6 @@
-# laser-tracking
+laser tracking
+==============
+
 This project aims at doing an object tracker based on a Raspberry Pi, Raspberry Pi camera, two servos motors and a laser pointer.
 
 The object is recognized with OpenCV analyzing the camera frames.
