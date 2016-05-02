@@ -19,7 +19,7 @@ width = 320
 connection = client_socket.makefile('wb')
 try:
     #connection.write(struct.pack("<LLL", height, width, 3))
-    client_socket.sendall(struct.pack("<LLL", height, width, 1))
+    client_socket.sendall(struct.pack("<LLL", height, width, 3))
 
     with picamera.PiCamera() as camera:
         camera.resolution = (width, height)
@@ -33,7 +33,7 @@ try:
         #conn_write = connection.write
 
         # Indentify color red
-        lower = np.array([3, 165, 110], dtype = "uint8")
+        lower = np.array([3, 150, 90], dtype = "uint8")
         upper = np.array([12, 255, 255], dtype = "uint8")
         kernel = np.ones((5,5),np.uint8)
 
@@ -49,12 +49,21 @@ try:
             mask = cv2.inRange(hsv, lower, upper)
             #output = cv2.bitwise_and(image, image, mask=mask)
 
-            #thresh = cv2.threshold(blurred, 60, 255, cv2.THRESH_BINARY)[1]
-
-            #opening = cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel)
+            mask = cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel)
             #closing = cv2.morphologyEx(opening, cv2.MORPH_CLOSE, kernel)
 
-            client_socket.sendall(closing.data)
+            cnts = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)[-2]
+
+            if len(cnts) > 0:
+                c = max(cnts, key=cv2.contourArea)
+                rect = cv2.minAreaRect(c)
+                center_x, center_y = rect[0] #rect = ((center_x,center_y),(width,height),angle)
+                box = cv2.boxPoints(rect)
+                box = np.int0(box)
+                cv2.drawContours(image, [box], 0, (0,255,0), 2)
+                cv2.circle(image, (int(center_x), int(center_y)), 3, (255,255,255), -1)
+
+            client_socket.sendall(image.data)
             #connection.flush()
 
             #print("Image sent")
