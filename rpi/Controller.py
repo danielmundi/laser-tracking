@@ -23,21 +23,7 @@ class Controller():
 
         self.pi.write(self.laser_pin, 1)
 
-    def run(self):
-        #self.pi.write(self.laser_pin, 1)
-
-        while not self.stopped():
-            self.control()
-            time.sleep(self.sampling_period)
-
-        #self.pi.write(self.laser_pin, 0)
-
-        # Stop all motors
-        #list(map(lambda x: x.stop(), self.motors))
-
-    def update_positions(self,_object, _laser):
-        self.object = _object
-        self.laser = _laser
+    
 
     def target(self, pos):
         x, y = pos
@@ -51,23 +37,7 @@ class Controller():
 
         print("({0},{1}) = ({2},{3})".format(x, y, round(servo[0]), round(servo[1])))
 
-    def control(self):
-        if not self.laser.visible:
-            return
 
-        # First control the motor in X axis than on Y
-        for i in range(2):
-            # Estimated laser position (from camera)
-            x_hat = self.motors[i].angle_est = self.laser.position[i]
-            # Estimated object position (from camera) - the laser goal
-            x_goal = self.object.position[i]
-            # Position the motor think is pointing
-            x = self.motors[i].angle
-
-            # Calculate the next position for the motor
-            x = x + self.kp*(math.degrees(math.atan(x_goal))-math.degrees(math.atan(x_hat)))
-
-            self.motors[i].set_position(x)
 
     def stop(self):
         self.pi.write(self.laser_pin, 0)
@@ -114,3 +84,44 @@ class Controller():
         self.transform = np.array([  [x[0], x[1], x[2]],
                                      [x[3], x[4], x[5]],
                                      [x[6], x[7],  1.0] ])
+
+
+
+    #########################################################
+    # Tests to use closed loop Controller                   #
+    # It still depends on a better tracking of the laser    #
+    # Also improvements on the update calculation           #
+    #########################################################
+    def run(self):
+        #self.pi.write(self.laser_pin, 1)
+
+        while not self.stopped():
+            self.control()
+            time.sleep(self.sampling_period)
+
+        #self.pi.write(self.laser_pin, 0)
+
+        # Stop all motors
+        #list(map(lambda x: x.stop(), self.motors))
+
+    def update_positions(self,_object, _laser):
+        self.object = _object
+        self.laser = _laser
+
+    def control(self):
+        if not self.laser.visible:
+            return
+
+        # First control the motor in X axis than on Y
+        for i in range(2):
+            # Estimated laser position (from camera)
+            x_hat = self.motors[i].angle_est = self.laser.position[i]
+            # Estimated object position (from camera) - the laser goal
+            x_goal = self.object.position[i]
+            # Position the motor think is pointing
+            x = self.motors[i].angle
+
+            # Calculate the next position for the motor
+            x = x + self.kp*(math.degrees(math.atan(x_goal))-math.degrees(math.atan(x_hat)))
+
+            self.motors[i].set_position(x)

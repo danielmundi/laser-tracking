@@ -35,10 +35,12 @@ def main():
 
     try:
         while True:
+            ##### Test without the camera #####
             #x = float(input("x: "))
             #y = float(input("y: "))
             #obj.position = (x,y)
             #control.update_positions(obj, camera.laser)
+            ############################################
 
             control.target(camera.object.position)
             time.sleep(sampling_period)
@@ -48,9 +50,6 @@ def main():
         run = False
         control.stop()
         camera.stop()
-
-        #control.join()
-        #camera.join()
 
         pi.stop()
 
